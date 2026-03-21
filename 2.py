@@ -1,4 +1,5 @@
 import streamlit as st
+from PIL import Image
 import os
 
 # -------------------------- 全局页面配置 --------------------------
