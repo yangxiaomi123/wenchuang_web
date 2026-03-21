@@ -14,32 +14,27 @@ st.set_page_config(
 if 'cart' not in st.session_state:
     st.session_state.cart = []
 
-# 购物车操作函数
+# 购物车操作函数（核心优化：移除st.rerun，改用st.toast轻提示）
 def add_to_cart(product_name, price, quantity=1):
     for item in st.session_state.cart:
         if item["name"] == product_name:
             item["quantity"] += quantity
-            st.success(f"✅ {product_name} 数量+{quantity}，已加入购物车！")
+            st.toast(f"✅ {product_name} 数量+{quantity}，已加入购物车！", icon="🛒")
             return
     st.session_state.cart.append({
         "name": product_name,
         "price": price,
         "quantity": quantity
     })
-    st.success(f"✅ {product_name} 已加入购物车！")
+    st.toast(f"✅ {product_name} 已加入购物车！", icon="🛒")
 
 def remove_from_cart(product_name):
     st.session_state.cart = [item for item in st.session_state.cart if item["name"] != product_name]
-    st.warning(f"❌ 已从购物车移除 {product_name}")
+    st.toast(f"❌ 已从购物车移除 {product_name}", icon="⚠️")
 
-# -------------------------- 自定义CSS样式（核心：标题下移0.5cm+艺术字+显示完整） --------------------------
+# -------------------------- 自定义CSS样式（优化：简化DOM干扰样式） --------------------------
 st.markdown("""
     <style>
-    /* 全局重置，避免标题被遮挡 */
-    html, body, [class*="css"] {
-        overflow-x: hidden !important;
-        box-sizing: border-box !important;
-    }
     /* 全局背景与字体 */
     .main {background-color: #FCFAF5; font-family: "Ma Shan Zheng", "PingFang SC", "Microsoft YaHei", sans-serif;}
     /* 关键：标题整体下移0.5cm（约3rem），并修复显示不全 */
@@ -160,8 +155,7 @@ st.markdown("""
         line-height: 1.8 !important;
     }
     /* 侧边栏美化 */
-    .css-1d391kg {background-color: #F5F0EB !important;}
-    .css-163ttbj {background-color: #F5F0EB !important;}
+    [data-testid="stSidebar"] {background-color: #F5F0EB !important;}
     /* 购物车样式 */
     .cart-item {
         padding: 10px !important;
@@ -281,7 +275,7 @@ AN_KANG_WENCHUANG = [
 st.sidebar.header("🏮 乡遇助梦·非遗文创甄选")
 st.sidebar.divider()
 
-# 购物车侧边栏展示
+# 购物车侧边栏展示（优化：移除删除按钮的st.rerun）
 with st.sidebar.expander("🛒 我的购物车", expanded=False):
     if st.session_state.cart:
         total_price = 0
@@ -302,13 +296,12 @@ with st.sidebar.expander("🛒 我的购物车", expanded=False):
             with col_cart4:
                 if st.button("🗑️", key=f"del_{idx}"):
                     remove_from_cart(item["name"])
-                    st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown(f'<p class="cart-total">合计：¥{total_price:.2f}</p>', unsafe_allow_html=True)
         if st.button("清空购物车", key="clear_cart"):
             st.session_state.cart = []
-            st.rerun()
+            st.toast("🛒 购物车已清空！", icon="✅")
     else:
         st.write("购物车空空如也～快去挑选心仪的文创吧✨")
 
@@ -375,7 +368,6 @@ elif page == "西安非遗文创甄选":
             with col_btn2:
                 if st.button(f"加入购物车", key=f"add_xa_{idx}", use_container_width=True):
                     add_to_cart(product["name"], product["price"], quantity)
-                    st.rerun()
             
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -403,7 +395,6 @@ elif page == "安康非遗文创甄选":
             with col_btn2:
                 if st.button(f"加入购物车", key=f"add_ak_{idx}", use_container_width=True):
                     add_to_cart(product["name"], product["price"], quantity)
-                    st.rerun()
             
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -443,12 +434,12 @@ elif page == "售后保障·联系我们":
 
             if submit_btn:
                 if not name.strip():
-                    st.error("❌ 请填写您的姓名！")
+                    st.toast("❌ 请填写您的姓名！", icon="⚠️")
                 elif not phone.strip():
-                    st.error("❌ 请填写有效的联系方式！")
+                    st.toast("❌ 请填写有效的联系方式！", icon="⚠️")
                 elif not problem.strip():
-                    st.error("❌ 请详细描述您的问题/需求！")
+                    st.toast("❌ 请详细描述您的问题/需求！", icon="⚠️")
                 else:
-                    st.success("✅ 留言提交成功！客服将在1小时内与您联系，感谢信任～")
+                    st.toast("✅ 留言提交成功！客服将在1小时内与您联系，感谢信任～", icon="✅")
 
     st.markdown('<p class="footer">© 2025 乡遇助梦·非遗文创甄选 版权所有 | 助力非遗传承 · 赋能乡村文创</p>', unsafe_allow_html=True)
