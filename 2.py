@@ -1,5 +1,6 @@
 import streamlit as st
-
+from PIL import Image
+import os
 
 # -------------------------- 全局页面配置 --------------------------
 st.set_page_config(
@@ -31,7 +32,7 @@ def remove_from_cart(product_name):
     st.session_state.cart = [item for item in st.session_state.cart if item["name"] != product_name]
     st.toast(f"❌ 已从购物车移除 {product_name}", icon="⚠️")
 
-# -------------------------- 自定义CSS样式（优化DOM兼容性） --------------------------
+# -------------------------- 自定义CSS样式（优化：简化DOM干扰样式） --------------------------
 st.markdown("""
     <style>
     /* 全局背景与字体 */
@@ -169,12 +170,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# -------------------------- 图片加载函数（核心优化：移除PIL依赖） --------------------------
+# -------------------------- 图片加载函数 --------------------------
 def load_product_image(img_name):
-    # 直接返回图片文件名（Streamlit会自动从仓库加载），失败时用网络占位图
     try:
-        # 先尝试返回本地图片路径
-        return img_name
+        if os.path.exists(img_name) and Image.open(img_name).size[0] > 0:
+            return Image.open(img_name)
+        else:
+            raise FileNotFoundError
     except:
         return "https://via.placeholder.com/400x300?text=乡遇助梦·非遗文创&font-size=16&color=7A2C2C&bgcolor=FCFAF5"
 
